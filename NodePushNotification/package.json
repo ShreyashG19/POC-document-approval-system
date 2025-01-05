@@ -1,0 +1,10 @@
+{
+    "dependencies": {
+        "express": "^4.19.2",
+        "node-pushnotifications": "^3.0.0",
+        "nodemon": "^3.1.9"
+    },
+    "scripts": {
+        "dev": "nodemon server.js"
+    }
+}
