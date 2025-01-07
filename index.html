@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Encrypt & Decrypt</title>
+    <script type="module">
+        import { PDFDocument } from 'https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm';
+
+        const password = "hi"; // Hardcoded password
+
+        // Encrypt PDF
+        async function encryptPDF() {
+            const fileInput = document.getElementById("encryptInput").files[0];
+            if (!fileInput) {
+                alert("Please select a PDF to encrypt.");
+                return;
+            }
+
+            const arrayBuffer = await fileInput.arrayBuffer();
+            const pdfDoc = await PDFDocument.load(arrayBuffer);
+
+            // Encrypt the document
+            const encryptedPdf = await pdfDoc.save({
+                useObjectStreams: false, // Ensures browser compatibility
+                password,
+            });
+
+            // Create a downloadable encrypted PDF
+            const blob = new Blob([encryptedPdf], { type: "application/pdf" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `encrypted_${fileInput.name}`;
+            link.click();
+        }
+
+        // Decrypt PDF
+        async function decryptPDF() {
+            const fileInput = document.getElementById("decryptInput").files[0];
+            if (!fileInput) {
+                alert("Please select a PDF to decrypt.");
+                return;
+            }
+
+            const arrayBuffer = await fileInput.arrayBuffer();
+            try {
+                // Load the encrypted PDF with the password
+                const pdfDoc = await PDFDocument.load(arrayBuffer, { password });
+                const decryptedPdf = await pdfDoc.save();
+
+                // Create a downloadable decrypted PDF
+                const blob = new Blob([decryptedPdf], { type: "application/pdf" });
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = `decrypted_${fileInput.name}`;
+                link.click();
+            } catch (error) {
+                alert("Failed to decrypt the PDF. Ensure the file is encrypted with the correct password.");
+                console.error("Decryption error:", error);
+            }
+        }
+
+        // Expose functions to the global scope
+        window.encryptPDF = encryptPDF;
+        window.decryptPDF = decryptPDF;
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .file-input {
+            margin: 20px 0;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>PDF Encrypt & Decrypt</h1>
+        <h3>Encrypt PDF</h3>
+        <input type="file" id="encryptInput" class="file-input" accept=".pdf" />
+        <button onclick="encryptPDF()">Encrypt</button>
+
+        <h3>Decrypt PDF</h3>
+        <input type="file" id="decryptInput" class="file-input" accept=".pdf" />
+        <button onclick="decryptPDF()">Decrypt</button>
+    </div>
+</body>
+
+</html>
